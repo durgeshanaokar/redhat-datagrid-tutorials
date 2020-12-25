@@ -11,18 +11,19 @@ public class InfinispanRemote {
    public static void main(String[] args) {
       // Create a configuration for a locally-running server
       ConfigurationBuilder builder = new ConfigurationBuilder();
-      builder.addServer().host("127.0.0.1").port(ConfigurationProperties.DEFAULT_HOTROD_PORT);
-      // Connect to the server
+      builder.addServer().host("172.30.65.185").port(ConfigurationProperties.DEFAULT_HOTROD_PORT).security()
+      .ssl()
+      //.sniHostName("myservername")
+      //.trustStoreFileName("/path/to/truststore")
+      //.trustStorePassword("truststorepassword".toCharArray())
+      .keyStoreFileName("/opt/infinispan/server/conf/keystore")
+      .keyStorePassword("password".toCharArray());;
+
       RemoteCacheManager cacheManager = new RemoteCacheManager(builder.build());
-      // Create test cache, if such does not exist
       cacheManager.administration().withFlags(CacheContainerAdmin.AdminFlag.VOLATILE).getOrCreateCache("test", "org.infinispan.DIST_SYNC");
-      // Obtain the remote cache
       RemoteCache<String, String> cache = cacheManager.getCache("test");
-      /// Store a value
       cache.put("key", "value");
-      // Retrieve the value and print it out
       System.out.printf("key = %s\n", cache.get("key"));
-      // Stop the cache manager and release all resources
       cacheManager.stop();
    }
 
